@@ -76,8 +76,8 @@ Ambos dispositivos se comunican mediante MQTT Seguro (SSL) utilizando HiveMQ Clo
 
 1️⃣ Servidor Flask: command_server.py
 
-Permite enviar comandos desde el navegador: **http://IP_PUBLICA:5005/enviar_comando?cmd=BUZZER_ON**
-Y entrega el comando al dispositivo: **http://IP_PUBLICA:5005/comando**
+Permite enviar comandos desde el navegador: **http://149.130.166.159/:5005/enviar_comando?cmd=BUZZER_ON**
+Y entrega el comando al dispositivo: **http://149.130.166.159:5005/comando**
 El dispositivo consulta este endpoint cada ciclo.
 
 2️⃣ Listener MQTT: mqtt_listener.py
