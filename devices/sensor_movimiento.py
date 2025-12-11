@@ -10,10 +10,10 @@ SSID = "Wokwi-GUEST"
 PASSWORD = ""
 
 # Tus credenciales (PON LAS MISMAS QUE EN EL OTRO DISPOSITIVO)
-MQTT_BROKER = "2378ba4b3fc64b5695542985699ce9c9.s1.eu.hivemq.cloud"
-MQTT_PORT = 8883
-MQTT_USER = "Jorge"          
-MQTT_PASSWORD = "Jorge2612"  
+MQTT_BROKER = "149.130.166.159"
+MQTT_PORT = 1883
+MQTT_USER =""           
+MQTT_PASSWORD =""   
 
 # ID Aleatorio
 random_id = urandom.randint(1000, 9999)
@@ -48,22 +48,19 @@ def conectar_wifi():
     print(" ¡Listo!")
     print("IP:", wlan.ifconfig()[0])
 
-# --- CONEXIÓN MQTT SEGURA (SSL) ---
+# --- CONEXIÓN MQTT SIN SSL (MOSQUITTO LOCAL EN EL VPS) ---
 def conectar_mqtt():
     try:
-        print(f"Conectando SSL a HiveMQ como {MQTT_CLIENT_ID}...")
+        print(f"Conectando a Mosquitto como {MQTT_CLIENT_ID}...")
         client = MQTTClient(
-            client_id=MQTT_CLIENT_ID, 
-            server=MQTT_BROKER, 
-            port=MQTT_PORT, 
-            user=MQTT_USER, 
-            password=MQTT_PASSWORD, 
-            keepalive=60,
-            ssl=True, 
-            ssl_params={'server_hostname': MQTT_BROKER}
+            client_id=MQTT_CLIENT_ID,
+            server=MQTT_BROKER,
+            port=MQTT_PORT,
+            keepalive=60
         )
+
         client.connect()
-        print("¡MQTT Seguro Conectado!")
+        print("¡MQTT Conectado sin SSL a Mosquitto!")
         return client
     except Exception as e:
         print(f"\nError conexión MQTT: {e}")

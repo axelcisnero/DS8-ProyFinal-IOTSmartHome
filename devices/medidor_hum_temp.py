@@ -8,17 +8,15 @@ from i2c_lcd import I2cLcd
 from time import sleep, time
 from mqtt import MQTTClient
 
-# --- 1. CONFIGURACIÓN DE HIVE MQ CLOUD (¡CAMBIA ESTO!) ---
+# --- 1. CONFIGURACIÓN WIFI ---
 SSID = "Wokwi-GUEST"
 PASSWORD = ""
 
-# Copia esto EXACTO de tu captura de pantalla:
-MQTT_BROKER = "2378ba4b3fc64b5695542985699ce9c9.s1.eu.hivemq.cloud" 
-MQTT_PORT = 8883 # El puerto SSL seguro
-
-# TUS CREDENCIALES (Las que creaste en Access Management):
-MQTT_USER = "Jorge"
-MQTT_PASSWORD = "Jorge2612"
+# --- CONFIGURACIÓN MQTT (MOSQUITTO EN TU VPS, SIN SSL) ---
+MQTT_BROKER = "149.130.166.159"   # IP de tu VPS
+MQTT_PORT = 1883                  # Puerto sin SSL
+MQTT_USER = ""                    # Sin usuario
+MQTT_PASSWORD = ""                # Sin contraseña
 
 # ID Aleatorio (Igual que antes)
 random_id = urandom.randint(1000, 9999)
@@ -66,22 +64,18 @@ def conectar_wifi():
     lcd.putstr("OK!")
     sleep(1)
 
-# --- CONEXIÓN MQTT SEGURA (¡NUEVO!) ---
+# --- CONEXIÓN MQTT (SIN SSL, MOSQUITTO) ---
 def conectar_mqtt():
     try:
-        print("Conectando a HiveMQ Cloud SSL...")
+        print(f"Conectando a Mosquitto como {MQTT_CLIENT_ID}...")
         client = MQTTClient(
-            client_id=MQTT_CLIENT_ID, 
-            server=MQTT_BROKER, 
-            port=MQTT_PORT, 
-            user=MQTT_USER, 
-            password=MQTT_PASSWORD, 
-            keepalive=60,
-            ssl=True, 
-            ssl_params={'server_hostname': MQTT_BROKER}
+            client_id=MQTT_CLIENT_ID,
+            server=MQTT_BROKER,
+            port=MQTT_PORT,
+            keepalive=60
         )
         client.connect()
-        print("¡MQTT Seguro Conectado!")
+        print("¡MQTT Conectado sin SSL a Mosquitto!")
         return client
     except Exception as e:
         print(f"Error MQTT: {e}")
@@ -136,20 +130,20 @@ try:
             elif modo_visualizacion == 3: 
                 lcd.move_to(0,0); lcd.putstr(f"Hum: {hum:.1f}%      ")
 
-            # 3. ENVIAR (igual que antes)
+            # 3. ENVIAR POR MQTT
             ahora = time()
             if (ahora - ultimo_envio > INTERVALO_ENVIO):
                 if client:
                     mensaje = ujson.dumps({"dispositivo": "clima_sala", "temp": temp, "hum": hum})
-                    print(f"Enviando SSL: {mensaje}")
+                    print(f"Enviando MQTT: {mensaje}")
                     try:
                         client.publish(MQTT_TOPIC_PUB, mensaje)
                         ultimo_envio = ahora
                     except:
-                        print("Reconectando...")
+                        print("Reconectando MQTT...")
                         client = conectar_mqtt()
 
-        # 4. CONSULTAR COMANDOS DESDE LA NUBE (NUEVO)
+        # 4. CONSULTAR COMANDOS DESDE LA NUBE (HTTP → tu Flask en el VPS)
         try:
             import urequests
             r = urequests.get("http://149.130.166.159:5005/comando")
